@@ -30,7 +30,7 @@ schema_view = get_schema_view(
         # license=openapi.License(name="BSD License"),
     ),
     public=True,
-    permission_classes=(permissions.AllowAny,),
+    # permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
@@ -41,5 +41,7 @@ urlpatterns = [
     path('redoc/', schema_view.with_ui('redoc',
         cache_timeout=0), name='schema-redoc'),
     path('admin/', admin.site.urls),
+    path('dj-rest-auth/', include('dj_rest_auth.urls')),
+    path('dj-rest-auth/registration/', include('dj_rest_auth.registration.urls')),
     path('snippets/', include('snippets.urls')),
 ]
