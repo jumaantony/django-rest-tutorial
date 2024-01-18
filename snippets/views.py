@@ -125,35 +125,49 @@ def snippet_detail(request, pk, format=None):
 
 
 # Using mixins
-from rest_framework import mixins
+# from rest_framework import mixins
+# from rest_framework import generics
+
+
+# class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+#     queryset = Snippet.objects.all()
+#     serializer_class = SnippetSerializer
+
+#     @swagger_auto_schema(responses={200: SnippetSerializer(many=True)}, operation_summary='Get All Snippets')
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+
+#     @swagger_auto_schema(request_body=SnippetSerializer, responses={201: SnippetSerializer()}, operation_summary='Create a Snippet')
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
+
+
+# class SnippetDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+#     queryset = Snippet.objects.all()
+#     serializer_class = SnippetSerializer
+
+#     @swagger_auto_schema(responses={200: SnippetSerializer()}, operation_summary='Get Snippet by ID')
+#     def get(self, request, *args, **kwargs):
+#         return self.retrieve(request, *args, **kwargs)
+
+#     @swagger_auto_schema(request_body=SnippetSerializer, responses={200: SnippetSerializer()}, operation_summary='Update Snippet')
+#     def patch(self, request, *args, **kwargs):
+#         return self.partial_update(request, *args, **kwargs)
+
+#     @swagger_auto_schema(responses={204: ''}, operation_summary='Delete Snippet')
+#     def delete(self, request, *args, **kwargs):
+#         return self.destroy(request, *args, **kwargs)
+
+
+# Using generic class based views
 from rest_framework import generics
 
 
-class SnippetList(mixins.ListModelMixin, mixins.CreateModelMixin, generics.GenericAPIView):
+class SnippetList(generics.ListCreateAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
 
-    @swagger_auto_schema(responses={200: SnippetSerializer(many=True)}, operation_summary='Get All Snippets')
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
 
-    @swagger_auto_schema(request_body=SnippetSerializer, responses={201: SnippetSerializer()}, operation_summary='Create a Snippet')
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-
-class SnippetDetail(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.DestroyModelMixin, generics.GenericAPIView):
+class SnippetDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Snippet.objects.all()
     serializer_class = SnippetSerializer
-
-    @swagger_auto_schema(responses={200: SnippetSerializer()}, operation_summary='Get Snippet by ID')
-    def get(self, request, *args, **kwargs):
-        return self.retrieve(request, *args, **kwargs)
-
-    @swagger_auto_schema(request_body=SnippetSerializer, responses={200: SnippetSerializer()}, operation_summary='Update Snippet')
-    def patch(self, request, *args, **kwargs):
-        return self.partial_update(request, *args, **kwargs)
-
-    @swagger_auto_schema(responses={204: ''}, operation_summary='Delete Snippet')
-    def delete(self, request, *args, **kwargs):
-        return self.destroy(request, *args, **kwargs)
