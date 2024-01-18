@@ -2,12 +2,15 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from snippets.models import Snippet
 from snippets.serializers import SnippetSerializer
-from django.http import HttpResponseNotAllowed, JsonResponse, HttpResponse
+from django.http import Http404, HttpResponseNotAllowed, JsonResponse, HttpResponse
 from rest_framework.decorators import api_view
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
-test_data = openapi.Schema(
+from rest_framework.views import APIView
+from rest_framework import status
+
+"""test_data = openapi.Schema(
     type=openapi.TYPE_OBJECT,
     properties={
         'title': openapi.Schema(type=openapi.TYPE_STRING, description='Enter your title here'),
@@ -20,6 +23,7 @@ test_data = openapi.Schema(
 
 
 # Create your views here.
+# Function based views
 @swagger_auto_schema(method='get', responses={200: SnippetSerializer(many=True)}, operation_summary='Get All Snippets')
 @swagger_auto_schema(method='post', request_body=test_data, responses={201: SnippetSerializer()}, operation_summary='Create a Snippet')
 @api_view(['GET', 'POST'])  # decorator to expose the function to the web
@@ -66,3 +70,57 @@ def snippet_detail(request, pk, format=None):
     elif request.method == 'DELETE':
         snippet.delete()
         return HttpResponse(status=204)
+"""
+
+# Class Based Views
+class SnippetList(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    @swagger_auto_schema(responses={200: SnippetSerializer(many=True)}, operation_summary='Get All Snippets')
+    def get(self, request, format=None):
+        snippets = Snippet.objects.all()
+        serializer= SnippetSerializer(snippets, many=True)
+        return JsonResponse(serializer.data, safe=False)
+    
+    @swagger_auto_schema(request_body=SnippetSerializer, responses={201: SnippetSerializer()}, operation_summary='Create a Snippet')
+    def post(self, request, format=None):
+        serializer = SnippetSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=status.HTTP_201_CREATED)
+        return JsonResponse(serializer.errors, status=status.HTTP_400_BAD_REQUEST, safe=False)
+
+
+class SnippetDetail(APIView):
+    """
+    Retieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Snippet.objects.get(pk=pk)
+        except Snippet.DoesNotExist:
+            raise Http404
+    
+    @swagger_auto_schema(responses={200: SnippetSerializer()}, operation_summary='Get Snippet by ID')    
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet)
+        return JsonResponse(serializer.data, safe=False)
+    
+    @swagger_auto_schema(request_body=SnippetSerializer, responses={200: SnippetSerializer()}, operation_summary='Update Snippet')
+    def patch(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, safe=False)
+        return JsonResponse(serializer.errors, status=status.HTTP_404_NOT_FOUND, safe=False)
+    
+    @swagger_auto_schema(responses={204: ''}, operation_summary='Delete Snippet')
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return HttpResponse(status=status.HTTP_204_NO_CONTENT)   
+    
+    
