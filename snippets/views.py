@@ -23,7 +23,7 @@ test_data = openapi.Schema(
 @swagger_auto_schema(method='get', responses={200: SnippetSerializer(many=True)}, operation_summary='Get All Snippets')
 @swagger_auto_schema(method='post', request_body=test_data, responses={201: SnippetSerializer()}, operation_summary='Create a Snippet')
 @api_view(['GET', 'POST'])  # decorator to expose the function to the web
-def snippet_list(request):
+def snippet_list(request, format=None):
     if request.method == 'GET':
         snippets = Snippet.objects.all()
         serializer = SnippetSerializer(snippets, many=True)
@@ -45,7 +45,7 @@ def snippet_list(request):
 @swagger_auto_schema(method='patch', request_body=test_data, responses={200: SnippetSerializer()}, operation_summary='Update Snippet')
 @swagger_auto_schema(method='delete', responses={204: ''}, operation_summary='Delete Snippet')
 @api_view(['GET', 'PATCH', 'DELETE'])
-def snippet_detail(request, pk):
+def snippet_detail(request, pk, format=None):
     try:
         snippet = Snippet.objects.get(pk=pk)
     except Snippet.DoesNotExist:
